@@ -1,7 +1,5 @@
 # based on regRSM package (http://cran.r-project.org/web/packages/regRSM/)
 
-options(width = 140)
-
 compute_initial_weights = function(y,x){
 # The function returns initial weights.
 
@@ -295,20 +293,25 @@ subexperiment = function(subsets, i, b, shifted, calculateWeigths = TRUE) {
   class = dane[, 1]
   data = dane[, 2:ncol(dane)]
 
-  weigthsAA = NULL
+  weightsAA = NULL
   fileName = 'log_'
   if (calculateWeigths) {
-    calculate_initial_weigths_with_t(class, data);
+    weightsAA = calculate_initial_weigths_with_t(class, data);
     fileName = 'log_wg_'
   }
 
   colnames(data) <- c(paste('V_S_' , 1:shifted, sep=''), paste('V_N_' , (shifted+1):ncol(data), sep='') )
 
-  reg = logRSM(class, data, m = subsets, B = b, initial_weights = weigthsAA)
+  reg = logRSM(class, data, m = subsets, B = b, initial_weights = weightsAA)
   result = rev(colnames(data)[order(reg$scores)])
   print (result[1:10])
 
   resultpath = paste(fileName, b, '_', subsets, '.csv', sep = '')
+  headerpath = paste(fileName, b, '-', subsets, '.csv', sep = '')
+  if (i == 1) {
+    write.table(t(colnames(data)), file = headerpath, col.names=FALSE, row.names=FALSE, sep = ",", quote = FALSE, append = TRUE)
+  }
+  write.table(t(reg$scores), file = headerpath, col.names=FALSE, row.names=FALSE, sep = ",", quote = FALSE, append = TRUE)
   write.table(t(result), file = resultpath, col.names=FALSE, row.names=FALSE, sep = ",", quote = FALSE, append = TRUE)
 }
 
